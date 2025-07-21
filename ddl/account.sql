@@ -40,7 +40,7 @@ COMMENT ON COLUMN account.role.modified_at IS 'Role''s last modification date';
 
 CREATE TABLE account.module (
     module_id   uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    name        module_name NOT NULL,
+    name        module_name NOT NULL UNIQUE,
     description VARCHAR(1000)
 );
 COMMENT ON TABLE account.module IS 'Module table';
@@ -106,9 +106,9 @@ COMMENT ON COLUMN account.account.modified_at IS 'Account''s last modification d
 ---------------------
 
 CREATE TABLE account.refresh_token (
-    refresh_token_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    account_id       uuid        NOT NULL,
-    expiration_date  timestamptz NOT NULL,
+    refresh_token_id VARCHAR(72) PRIMARY KEY NOT NULL,
+    account_id       uuid                    NOT NULL,
+    expiration_date  timestamptz             NOT NULL,
     FOREIGN KEY (account_id)
         REFERENCES account.account (account_id) ON DELETE CASCADE
 );
