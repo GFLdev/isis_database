@@ -4,17 +4,17 @@ CREATE SCHEMA account;
 --- Custom Types ---
 --------------------
 
-CREATE TYPE module_name AS ENUM ('account', 'finance', 'drive', 'calendar', 'ai');
-COMMENT ON TYPE module_name IS 'Module name';
+CREATE TYPE account.module_name AS ENUM ('account', 'finance', 'drive', 'calendar', 'ai');
+COMMENT ON TYPE account.module_name IS 'Module name';
 
-CREATE TYPE table_name AS ENUM ('account', 'role', 'role_module', 'module','refresh_token', 'login_attempt');
-COMMENT ON TYPE table_name IS 'Table name';
+CREATE TYPE account.table_name AS ENUM ('account', 'role', 'role_module', 'module','refresh_token', 'login_attempt');
+COMMENT ON TYPE account.table_name IS 'Table name';
 
-CREATE TYPE query_type AS ENUM ('insert', 'select' , 'update', 'delete');
-COMMENT ON TYPE query_type IS 'Query type';
+CREATE TYPE account.query_type AS ENUM ('insert', 'select' , 'update', 'delete');
+COMMENT ON TYPE account.query_type IS 'Query type';
 
-CREATE TYPE log_type AS ENUM ('success','error');
-COMMENT ON TYPE log_type IS 'Log type';
+CREATE TYPE account.log_type AS ENUM ('success','error');
+COMMENT ON TYPE account.log_type IS 'Log type';
 
 ------------
 --- ROLE ---
@@ -39,13 +39,11 @@ COMMENT ON COLUMN account.role.modified_at IS 'Role''s last modification date';
 --------------
 
 CREATE TABLE account.module (
-    module_id   uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    name        module_name NOT NULL UNIQUE,
+    module_name account.module_name PRIMARY KEY,
     description VARCHAR(1000)
 );
 COMMENT ON TABLE account.module IS 'Module table';
-COMMENT ON COLUMN account.module.module_id IS 'Module id';
-COMMENT ON COLUMN account.module.name IS 'Module''s name';
+COMMENT ON COLUMN account.module.module_name IS 'Module''s name';
 COMMENT ON COLUMN account.module.description IS 'Module''s description';
 
 -------------------
@@ -53,17 +51,17 @@ COMMENT ON COLUMN account.module.description IS 'Module''s description';
 -------------------
 
 CREATE TABLE account.role_module (
-    role_id   uuid    NOT NULL,
-    module_id uuid    NOT NULL,
-    elevated  BOOLEAN NOT NULL DEFAULT FALSE,
+    role_id     uuid                NOT NULL,
+    module_name account.module_name NOT NULL,
+    elevated    BOOLEAN             NOT NULL DEFAULT FALSE,
     FOREIGN KEY (role_id)
         REFERENCES account.role (role_id) ON DELETE CASCADE,
-    FOREIGN KEY (module_id)
-        REFERENCES account.module (module_id) ON DELETE CASCADE
+    FOREIGN KEY (module_name)
+        REFERENCES account.module (module_name) ON DELETE CASCADE
 );
 COMMENT ON TABLE account.role_module IS 'Role-Module reference table';
 COMMENT ON COLUMN account.role_module.role_id IS 'Role id';
-COMMENT ON COLUMN account.role_module.module_id IS 'Module id';
+COMMENT ON COLUMN account.role_module.module_name IS 'Module name';
 COMMENT ON COLUMN account.role_module.elevated IS 'Elevated (admin) permission flag';
 
 ---------------
@@ -144,14 +142,14 @@ COMMENT ON COLUMN account.login_attempt.user_agent IS 'Login attempt''s user age
 -------------------
 
 CREATE TABLE account.account_log (
-    log_id      uuid PRIMARY KEY       DEFAULT gen_random_uuid(),
-    table_name  table_name    NOT NULL,
-    table_field VARCHAR(50)   NOT NULL,
-    pk_value    VARCHAR(36)   NOT NULL,
-    query_type  query_type    NOT NULL,
-    log_type    log_type      NOT NULL,
-    message     VARCHAR(1000) NOT NULL,
-    created_at  timestamptz   NOT NULL DEFAULT NOW()
+    log_id      uuid PRIMARY KEY            DEFAULT gen_random_uuid(),
+    table_name  account.table_name NOT NULL,
+    table_field VARCHAR(50)        NOT NULL,
+    pk_value    VARCHAR(36)        NOT NULL,
+    query_type  account.query_type NOT NULL,
+    log_type    account.log_type   NOT NULL,
+    message     VARCHAR(1000)      NOT NULL,
+    created_at  timestamptz        NOT NULL DEFAULT NOW()
 );
 COMMENT ON TABLE account.account_log IS 'Account log table';
 COMMENT ON COLUMN account.account_log.log_id IS 'Account log''s id';
