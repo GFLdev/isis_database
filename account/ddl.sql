@@ -82,7 +82,7 @@ CREATE TABLE account.account (
     created_at    timestamptz         NOT NULL DEFAULT NOW(),
     modified_at   timestamptz,
     FOREIGN KEY (role_id)
-        REFERENCES account.role (role_id) ON DELETE CASCADE,
+        REFERENCES account.role (role_id),
     CONSTRAINT username_length CHECK (CHAR_LENGTH(username) >= 4)
 );
 COMMENT ON TABLE account.account IS 'Account table';
